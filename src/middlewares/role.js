@@ -23,3 +23,15 @@ exports.isAdmin = (req, res, next) => {
 	}
 	res.status(403).send('Forbidden');
 };
+
+
+// Super admin - just for Swagger purpose
+exports.isSuperAdmin = (req, res, next) => {
+    if (req.user && req.user.userRole === 'superAdmin') {
+        return next();
+    }
+    res.status(403).json({ 
+        error: 'Super admin privileges required',
+        message: 'Sorry for this but for security purpose I disabled these for a regular admin.'
+    });
+};

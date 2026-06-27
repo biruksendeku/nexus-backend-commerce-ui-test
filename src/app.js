@@ -19,7 +19,7 @@ const swaggerSpec = require('./config/ui-tests/swagger');
 
 
 // local modules
-const { isLoggedIn, isAdmin } = require('./middlewares/role');
+const { isLoggedIn } = require('./middlewares/role');
 const {
 	apiLimiter,
 	publicLimiter
@@ -146,7 +146,7 @@ app.use('/api/verify', verificationRoutes);
 app.use('/products', isLoggedIn, productRoutes);
 app.use('/api/payment', isLoggedIn, paymentRoutes);
 app.use('/account', isLoggedIn, accountRoutes);
-app.use('/admin', isLoggedIn, isAdmin, adminRoutes);
+// app.use('/admin', isLoggedIn, isAdmin, adminRoutes);
 
 // homepage demonstrator
 app.use('/', isLoggedIn, homepageRoute);

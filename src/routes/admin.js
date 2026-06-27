@@ -11,6 +11,8 @@ const handleValidationErrors = require('../middlewares/errors/handleValidationEr
 const abortSignal = require('../middlewares/abort');
 const loadProduct = require('../utils/validator/loadProduct');
 
+const { isAdmin, isSuperAdmin } = require('../middlewares/role');
+
 // ---------- SWAGGER COMMENTS ----------
 
 /**
@@ -80,6 +82,7 @@ const loadProduct = require('../utils/validator/loadProduct');
  *                           type: number
  */
 router.get('/dashboard',
+	isAdmin,
     abortSignal,
     adminController.dashboard
 );
@@ -145,6 +148,7 @@ router.get('/dashboard',
  *         description: Validation error or missing images
  */
 router.post('/create',
+	isAdmin,
     upload.array('images', 5),
     ...adminValidator.createProduct,
     handleValidationErrors,
@@ -225,6 +229,7 @@ router.post('/create',
  *                       type: boolean
  */
 router.get('/products',
+	isAdmin,
     abortSignal,
     ...adminValidator.getAllProducts,
     handleValidationErrors,
@@ -262,6 +267,7 @@ router.get('/products',
  *         description: Product not found
  */
 router.get('/products/:id',
+	isAdmin,
     ...adminValidator.getOneProduct,
     handleValidationErrors,
     adminController.getOneProduct
@@ -325,6 +331,7 @@ router.get('/products/:id',
  *                   type: object
  */
 router.get('/orders',
+	isAdmin,
     abortSignal,
     ...adminValidator.getAllOrders,
     handleValidationErrors,
@@ -362,6 +369,7 @@ router.get('/orders',
  *         description: Order not found
  */
 router.get('/orders/:id',
+  isAdmin,
   abortSignal,
   ...adminValidator.getOneOrder,
   handleValidationErrors,
@@ -414,6 +422,7 @@ router.get('/orders/:id',
  *         description: Order not found
  */
 router.patch('/orders/:id',
+  isSuperAdmin,
   ...adminValidator.updateOrder,
   handleValidationErrors,
   adminController.updateOrder
@@ -477,6 +486,7 @@ router.patch('/orders/:id',
  *                             type: object
  */
 router.get('/revenue',
+	isAdmin,
     abortSignal,
     adminController.getAllRevenue
 );
@@ -554,6 +564,7 @@ router.get('/revenue',
  *         description: Max image limit exceeded or validation error
  */
 router.patch('/products/:id',
+	isAdmin,
 	loadProduct, // to fetch and attach product to the req object
     upload.array('images', 5),
     ...adminValidator.updateProduct,
@@ -592,6 +603,7 @@ router.patch('/products/:id',
  *         description: Product not found
  */
 router.delete('/products/:id',
+	isSuperAdmin,
     ...adminValidator.deleteProduct,
     handleValidationErrors,
     adminController.deleteProduct
@@ -654,6 +666,7 @@ router.delete('/products/:id',
  *                       type: boolean
  */
 router.get('/users',
+	isAdmin,
 	abortSignal,
 	adminController.getAllUsers
 );
@@ -693,6 +706,7 @@ router.get('/users',
  *         description: User not found
  */
 router.get('/users/:id',
+	isAdmin,
 	...adminValidator.getOneUser,
 	handleValidationErrors,
 	adminController.getOneUser
@@ -762,6 +776,7 @@ router.get('/users/:id',
  *         description: User not found
  */
 router.patch('/users/:id',
+	isSuperAdmin,
 	...adminValidator.updateUser,
 	handleValidationErrors,
 	adminController.updateUser
@@ -809,6 +824,7 @@ router.patch('/users/:id',
  *         description: User not found
  */
 router.delete('/users/:id',
+	isSuperAdmin,
 	...adminValidator.deleteUser,
 	handleValidationErrors,
 	adminController.deleteUser
@@ -902,6 +918,7 @@ router.delete('/users/:id',
  *                   example: Invalid credentials
  */
 router.get('/errors',
+	isAdmin,
     adminController.getCriticalErrors
 );
 
@@ -985,6 +1002,7 @@ router.get('/errors',
  *                   example: Error log not found
  */
 router.get('/errors/:id',
+	isAdmin,
 	...adminValidator.getErrorDetail,
 	handleValidationErrors,
 	adminController.getErrorDetail
@@ -1047,6 +1065,7 @@ router.get('/errors/:id',
  *                   example: Error log not found
  */
 router.delete('/errors/:id',
+	isSuperAdmin,
 	...adminValidator.deleteError,
 	handleValidationErrors,
 	adminController.deleteError
