@@ -430,8 +430,14 @@ exports.createProduct = async (req, res) => {
     throw new BadRequestError('At least one product image is required');
   }
 
-  // Upload all images to Cloudinary
-  const uploadResults = await Promise.all(
+  // Enforce max image limit (this was missing — only updateProduct checked it before)
+  const maxImages = parseInt(process.env.MAX_IMAGE_LIMIT || 5);
+  if (req.files.length > maxImages) {
+    throw new BadRequestError(`Max ${maxImages} images allowed`);
+  }
+
+  // Upload with allSettled so a partial failure can be cleanly rolled back
+  const results = await Promise.allSettled(
     req.files.map((file) => {
       return new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
@@ -443,26 +449,40 @@ exports.createProduct = async (req, res) => {
     })
   );
 
-  // Creating new product
-  const newProduct = await Product.create({
-    name,
-    price: parseFloat(price),
-    quantity: parseFloat(quantity),
-    images: uploadResults.map((r) => ({ url: r.secure_url, public_id: r.public_id })),
-    category,
-    productInfo,
-    deliveryTime,
-    status: status || 'in stock',
-  });
+  const failed = results.filter((r) => r.status === 'rejected');
+  const succeeded = results.filter((r) => r.status === 'fulfilled').map((r) => r.value);
 
-  // Check client existence before sending response
-  guard.check();
+  if (failed.length > 0) {
+    await Promise.allSettled(succeeded.map((r) => cloudinary.uploader.destroy(r.public_id)));
+    throw new Error(`Upload failed: ${failed[0].reason.message}`);
+  }
 
-  // Send json response
-  res.status(201).json({
-    success: true,
-    data: newProduct,
-  });
+  try {
+    // Creating new product
+    const newProduct = await Product.create({
+      name,
+      price: parseFloat(price),
+      quantity: parseFloat(quantity),
+      images: succeeded.map((r) => ({ url: r.secure_url, public_id: r.public_id })),
+      category,
+      productInfo,
+      deliveryTime,
+      status: status || 'in stock',
+    });
+
+    // Check client existence before sending response
+    guard.check();
+
+    // Send json response
+    res.status(201).json({
+      success: true,
+      data: newProduct,
+    });
+  } catch (err) {
+    // roll back uploaded images if the DB save failed
+    await Promise.allSettled(succeeded.map((r) => cloudinary.uploader.destroy(r.public_id)));
+    throw err; // caught by global error handler
+  }
 };
 
 

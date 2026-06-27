@@ -23,8 +23,12 @@ const productSchema = new mongoose.Schema({
 		default: 0
 	},
 	images: {
-		type: Array,
-		required: [ true, 'Product-Image is required' ]
+	  type: Array,
+	  required: [true, 'Product-Image is required'],
+	  validate: {
+	    validator: (arr) => arr.length > 0 && arr.length <= (parseInt(process.env.MAX_IMAGE_LIMIT) || 5),
+	    message: () => `A product must have between 1 and ${parseInt(process.env.MAX_IMAGE_LIMIT) || 5} images.`,
+	  },
 	},
 	category: {
 		type: String,

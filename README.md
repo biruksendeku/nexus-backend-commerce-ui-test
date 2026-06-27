@@ -1,13 +1,19 @@
 markdown
 # Production‑ready e‑commerce backend — advanced dashboard and analytics, authentication, orders, payments, email, and more
 
-[![Freemium Available](https://img.shields.io/badge/Freemium-Available-brightgreen)](#-licensing--pricing)
 
-
-A battle‑tested, modular Node.js + Express + MongoDB backend for e‑commerce applications.  
+A battle‑tested, modular Node.js + Express.js + MongoDB backend for e‑commerce applications.  
 Built for teams who need to ship fast without sacrificing scalability or security.
 
 ---
+
+
+### ⚠️⚠️⚠️ Important Notice Before You Proceed ⚠️⚠️⚠️
+* Rename the ".env.example" into ".env" and put real environment variables
+ before you proceed, otherwise the app WILL CRASH.
+ The guide to get those variables is here in README.md file.
+ The commonly used variables have been set, you can also reset them.
+
 
 ## 🚀 Features
 
